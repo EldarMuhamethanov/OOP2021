@@ -14,13 +14,12 @@ struct Args
     string value;
 };
 
-string RadixConvert(string value, int sourceNotation, int destinationNotation, bool& wasError);
-long long StringToInt(const string& str, int radix, bool& wasError);
-int ConvertCharToInt(char ch);
-string IntToString(long long n, int radix, bool& wasError);
-char ConvertIntToChar(long long num);
+string RadixConvert(const string& value, const int& sourceNotation, const int& destinationNotation, bool& wasError);
+long long StringToInt(const string& str, const int& radix, bool& wasError);
+int ConvertCharToInt(const char& ch);
+string IntToString(const long long& n, const int& radix, bool& wasError);
+char ConvertIntToChar(long long& num);
 bool IsDigits(const string& str);
-bool CheckValidNumber(const string& value, int radix);
 
 
 optional<Args> ParseArgs(int argc, char* argv[])
@@ -41,6 +40,8 @@ optional<Args> ParseArgs(int argc, char* argv[])
 int main(int argc, char* argv[]) {
     SetConsoleOutputCP(CP_UTF8);
 
+    //TODO В функцию
+    // ------------------- 
     auto args = ParseArgs(argc, argv);
 
     if (!args)
@@ -78,6 +79,9 @@ int main(int argc, char* argv[]) {
 
     bool error = false;
 
+    // ---------------------
+
+    //Без Int
     string result = RadixConvert(value, sourceNotationInt, destinationNotationInt, error);
 
     if (error)
@@ -90,16 +94,18 @@ int main(int argc, char* argv[]) {
     return 0;
 }
 
-string RadixConvert(string value, int sourceNotation, int destinationNotation, bool& wasError)
+// Сделать такЮ чтобы функция не выводила ошибку
+string RadixConvert(const string& value, const int& sourceNotation, const int& destinationNotation, bool& wasError)
 {
     string initialValue = value;
     bool isNegative = false;
+    // нет проверка на пустую строку, не делает работу за вызваему функцию
     if (value[0] == '-')
     {
         isNegative = true;
         initialValue = value.substr(1);
     }
-    long long decimalValue = StringToInt(move(initialValue), sourceNotation, wasError);
+    long long decimalValue = StringToInt(initialValue, sourceNotation, wasError);
     if (wasError)
     {
         cout << "Failed to convert Value to decimal notation";
@@ -114,7 +120,8 @@ string RadixConvert(string value, int sourceNotation, int destinationNotation, b
     return isNegative ? '-' + resultValue : resultValue;
 }
 
-string IntToString(long long n, int radix, bool& wasError)
+// убрать wasError, убать передачу по константной ссылке 
+string IntToString(const long long& n, const int& radix, bool& wasError)
 {
     string reverseResult;
     long long dividend = n;
@@ -129,7 +136,8 @@ string IntToString(long long n, int radix, bool& wasError)
     return reverseResult;
 }
 
-long long StringToInt(const string& str, int radix, bool& wasError)
+// Инициализировать выходные параметры функции
+long long StringToInt(const string& str, const int& radix, bool& wasError)
 {
     int valueLength = str.length();
     long long res = 0;
@@ -152,7 +160,7 @@ long long StringToInt(const string& str, int radix, bool& wasError)
     return res;
 }
 
-int ConvertCharToInt(char ch)
+int ConvertCharToInt(const char& ch)
 {
     if (ch <= '9' && ch >= '0')
     {
@@ -161,7 +169,7 @@ int ConvertCharToInt(char ch)
     return 10 + ch - 'A';
 }
 
-char ConvertIntToChar(long long num)
+char ConvertIntToChar(long long& num)
 {
     if (num <= 9)
     {

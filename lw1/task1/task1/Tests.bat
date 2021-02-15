@@ -11,16 +11,19 @@ fc "%TEMP%\fox.txt" test-data\empty.txt || goto err
 %MyProgram% test-data\fox.txt "%TEMP%\fox.txt" dog cat || goto err
 fc "%TEMP%\fox.txt" test-data\fox-replaced-dog-with-cat.txt || goto err
 
+%MyProgram% test-data\fox.txt "%TEMP%\fox.txt" fox foxfox || goto err
+fc "%TEMP%\fox.txt" test-data\fox-replaced-fox-with-foxfox.txt || goto err
+
 %MyProgram% test-data\fox.txt "%TEMP%\fox.txt" fox || goto err
 fc "%TEMP%\fox.txt" test-data\fox.txt || goto err
 
 %MyProgram% test-data\multiline-fox.txt "%TEMP%\fox.txt" dog cat || goto err
 fc "%TEMP%\fox.txt" test-data\multiline-fox-replaced-dog-with-cat.txt || goto err
 
-%MyProgram% non-existing-file-name.txt %TEMP%\non-existing-file-name.txt > "%TEMP%\output.txt"
+%MyProgram% non-existing-file-name.txt "%TEMP%\non-existing-file-name.txt" > "%TEMP%\output.txt"
 if NOT ERRORLEVEL 1 goto err
 
-%MyProgram% multiline.txt %MyProgram% > %TEMP%\output.txt
+%MyProgram% multiline.txt %MyProgram% > "%TEMP%\output.txt"
 if NOT ERRORLEVEL 1 goto err
 
 REM Успешно

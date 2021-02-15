@@ -7,6 +7,7 @@
 #include <sstream>
 #include <vector>
 #include <optional>
+#include <iomanip>
 
 
 using namespace std;
@@ -15,6 +16,11 @@ const short MATRIX_SIZE = 3;
 
 typedef double Matrix3x3[MATRIX_SIZE][MATRIX_SIZE];
 typedef double Matrix2x2[2][2];
+
+struct Error
+{
+    string errorMessage;
+};
 
 struct Args
 {
@@ -31,10 +37,9 @@ struct WrappedMatrix2x2
     Matrix2x2 items;
 };
 
-WrappedMatrix3x3 MatrixInit(ifstream& in, bool& error);
+optional<WrappedMatrix3x3> MatrixInit(const string& inputFileName, Error& error);
 void WriteMatrix(WrappedMatrix3x3 matrix);
-string Readline(ifstream& in);
-WrappedMatrix3x3 FindInvertMatrix(WrappedMatrix3x3 matrix, bool& error);
+optional<WrappedMatrix3x3> FindInvertMatrix(WrappedMatrix3x3 matrix, Error& error);
 WrappedMatrix2x2 GetMinor(WrappedMatrix3x3 matrix, int column, int row);
 double CalculateDeterminant2x2(WrappedMatrix2x2 matrix);
 double CalculateDeterminant3x3(WrappedMatrix3x3 matrix);
@@ -70,40 +75,34 @@ int main(int argc, char* argv[])
     {
         return 1;
     }
-    in.open(args->inputFileName);
-    if (!in.is_open())
+    Error error;
+    auto matrix = MatrixInit(args->inputFileName, error);
+    if (!matrix)
     {
-        cout << "Failed to open " << args->inputFileName << " to reading" << endl;
+        cout << error.errorMessage << endl;
         return 1;
     }
 
-    bool error = false;
-    WrappedMatrix3x3 matrix = MatrixInit(in, error);
-    if (error)
+    auto invertMatrix = FindInvertMatrix(*matrix, error);
+    if (!invertMatrix)
     {
-        cout << "Failed to read initial matrix" << endl;
+        cout << error.errorMessage << endl;
         return 1;
     }
 
-    WrappedMatrix3x3 invertMatrix = FindInvertMatrix(matrix, error);
-    if (error)
-    {
-        cout << "non-degenerate matrix" << endl;
-        return 1;
-    }
-
-    WriteMatrix(invertMatrix);
+    WriteMatrix(*invertMatrix);
     return 0;
 }
 
-WrappedMatrix3x3 FindInvertMatrix(WrappedMatrix3x3 matrix, bool& error)
+optional<WrappedMatrix3x3> FindInvertMatrix(WrappedMatrix3x3 matrix, Error& error)
 {
+    error.errorMessage = "";
     double determinant = CalculateDeterminant3x3(matrix);
 
     if (determinant == 0)
     {
-        error = true;
-        return {};
+        error.errorMessage = "Determinant = 0 -> matrix - non degenerade";
+        return nullopt;
     }
 
     WrappedMatrix3x3 transposedMatrix = TransposeMatrix(matrix);
@@ -131,7 +130,7 @@ WrappedMatrix3x3 GetMatrixKoef(WrappedMatrix3x3 matrix)
     return koefMatrix;
 }
 
-WrappedMatrix3x3 MatrixDivision(WrappedMatrix3x3 matrix, double number)
+WrappedMatrix3x3 MatrixDivision(WrappedMatrix3x3 matrix, double divisor)
 {
     WrappedMatrix3x3 resultMatrix;
     for (int row = 0; row < MATRIX_SIZE; row++)
@@ -139,7 +138,7 @@ WrappedMatrix3x3 MatrixDivision(WrappedMatrix3x3 matrix, double number)
         for (int column = 0; column < MATRIX_SIZE; column++)
         {
             double value = matrix.items[row][column];
-            resultMatrix.items[row][column] = round(value / number * 1000) / 1000;
+            resultMatrix.items[row][column] = value / divisor;
         }
     }
     return resultMatrix;
@@ -172,65 +171,71 @@ double CalculateDeterminant3x3(WrappedMatrix3x3 matrix)
 
 WrappedMatrix2x2 GetMinor(WrappedMatrix3x3 matrix, int column, int row)
 {
-    vector<int> minorRow;
-    vector<int> minorColumn;
+    int minorRow[2];
+    int minorColumn[2];
 
+    int minorIndexRow = 0;
+    int minorIndexColumn = 0;
     for (int i = 0; i < MATRIX_SIZE; i++)
     {
         if (row != i)
         {
-            minorRow.push_back(i);
+            minorRow[minorIndexRow] = row;
+            minorIndexRow++;
         }
         if (column != i)
         {
-            minorColumn.push_back(i);
+            minorColumn[minorIndexColumn] = column;
+            minorIndexColumn++;
         }
     }
     return {
         {
-        {matrix.items[minorRow[0]][minorColumn[0]], matrix.items[minorRow[0]][minorColumn[1]]},
-        {matrix.items[minorRow[1]][minorColumn[0]], matrix.items[minorRow[1]][minorColumn[1]]},
+            {matrix.items[minorRow[0]][minorColumn[0]], matrix.items[minorRow[0]][minorColumn[1]]},
+            {matrix.items[minorRow[1]][minorColumn[0]], matrix.items[minorRow[1]][minorColumn[1]]},
         },
     };
 }
 
-WrappedMatrix3x3 MatrixInit(ifstream& in, bool& error)
+optional<WrappedMatrix3x3> MatrixInit(const string& inputFileName, Error& error)
 {
-    WrappedMatrix3x3 defaultMatrix;
+    error.errorMessage = "";
+    ifstream in;
+    in.open(inputFileName);
+    if (!in.is_open())
+    {
+        error.errorMessage = "Failed to open " + inputFileName + " to reading";
+        return nullopt;
+    }
+    
+    WrappedMatrix3x3 matrix;
     for (int row = 0; row < MATRIX_SIZE; row++)
     {
-        if (in.eof())
+        string rowLine;
+        if (getline(in, rowLine) && IsBlankLine(rowLine))
         {
-            error = true;
-            return {};
-        }
-        string rowLine = Readline(in);
-        if (IsBlankLine(rowLine))
-        {
-            error = true;
-            return {};
+            error.errorMessage = "Blank line or file eof find";
+            return nullopt;
         }
         istringstream strm(rowLine);
         for (int column = 0; column < MATRIX_SIZE; column++)
         {
-            string numberString;
+            string columnValue;
             if (strm.eof())
             {
-                error = true;
-                return {};
+                error.errorMessage = "Invalid count of elements";
+                return nullopt;
             }
-            strm >> numberString;
-            double number;
-            if (!IsDigits(numberString))
+            strm >> columnValue;
+            if (!IsDigits(columnValue))
             {
-                error = true;
-                return {};
+                error.errorMessage = "Not number character was found";
+                return nullopt;
             }
-            number = stod(numberString);
-            defaultMatrix.items[row][column] = number;
+            matrix.items[row][column] = stod(columnValue);
         }
     }
-    return defaultMatrix;
+    return matrix;
 }
 
 void WriteMatrix(WrappedMatrix3x3 matrix)
@@ -239,24 +244,14 @@ void WriteMatrix(WrappedMatrix3x3 matrix)
     {
         for (int column = 0; column < MATRIX_SIZE; column++)
         {
+            cout << fixed << setprecision(3) << matrix.items[row][column];
             if (column != MATRIX_SIZE - 1)
             {
-                printf("%4.3f ", matrix.items[row][column]);
-            }
-            else
-            {
-                printf("%4.3f", matrix.items[row][column]);
+                cout << " ";
             }
         }
         cout << endl;
     }
-}
-
-string Readline(ifstream& in)
-{
-    string str;
-    getline(in, str);
-    return str;
 }
 
 bool IsDigits(const string& str)

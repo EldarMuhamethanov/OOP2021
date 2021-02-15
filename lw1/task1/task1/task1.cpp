@@ -16,9 +16,8 @@ struct Args
     string replaced;
 };
 
-void CopyAndReplace(ifstream& in, ofstream& out, string searched, string replaced);
-bool IsBlankLine(string str);
-string StrReplace(string line, string searched, string replaced);
+void CopyAndReplace(istream& in, ostream& out, const string& searched, const string& replaced);
+string StrReplace(const string line, const string& searched, const string& replaced);
 
 
 optional<Args> ParseArgs(int argc, char* argv[])
@@ -69,13 +68,13 @@ int main(int argc, char* argv[])
     return 0;
 }
 
-void CopyAndReplace(ifstream& in, ofstream& out, string searched, string replaced)
+void CopyAndReplace(istream& in, ostream& out, const string& searched, const string& replaced)
 {
     string line;
     while (getline(in, line))
     {
         string lineAfterReplace = line;
-        if (!IsBlankLine(line) && !replaced.empty())
+        if (!line.empty() && !replaced.empty())
         {
             lineAfterReplace = StrReplace(line, searched, replaced);
         }
@@ -83,26 +82,16 @@ void CopyAndReplace(ifstream& in, ofstream& out, string searched, string replace
     }
 }
 
-string StrReplace(string line, string searched, string replaced)
+string StrReplace(const string line, const string& searched, const string& replaced)
 {
     const int searchedLength = searched.length();
     const int replacedLength = replaced.length();
     string lineAfterReplace = line;
     int posOfSearched = lineAfterReplace.find(searched);
-    while (posOfSearched != -1)
+    while (posOfSearched != string::npos)
     {
         lineAfterReplace.replace(posOfSearched, searchedLength, replaced);
         posOfSearched = lineAfterReplace.find(searched, posOfSearched + replacedLength);
     }
     return lineAfterReplace;
-}
-
-bool IsSpace(char ch)
-{
-    return ch == ' ';
-}
-
-bool IsBlankLine(string str)
-{
-    return str.empty() || all_of(str.begin(), str.end(), IsSpace);
 }
