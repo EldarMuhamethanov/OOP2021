@@ -7,17 +7,22 @@
 
 using namespace std;
 
+struct Error
+{
+    string errorMessage;
+};
+
 struct Args
 {
-    string sourceNotation;
-    string destinationNotation;
+    int sourceNotation;
+    int destinationNotation;
     string value;
 };
 
-string RadixConvert(const string& value, const int& sourceNotation, const int& destinationNotation, bool& wasError);
-long long StringToInt(const string& str, const int& radix, bool& wasError);
+optional<string> RadixConvert(const string& value, int sourceNotation, int destinationNotation, Error& error);
+optional<long long> StringToInt(const string& str, int radix, Error& error);
 int ConvertCharToInt(const char& ch);
-string IntToString(const long long& n, const int& radix, bool& wasError);
+string IntToString(long long n, int radix);
 char ConvertIntToChar(long long& num);
 bool IsDigits(const string& str);
 
@@ -30,18 +35,46 @@ optional<Args> ParseArgs(int argc, char* argv[])
         cout << "Usage: task2.exe <sourceNotation> <destinationNotation> <value>\n";
         return nullopt;
     }
+
+    string initialSourceNotation = argv[1];
+    string initialDestinationNotation = argv[2];
+    string value = argv[3];
+
+    int sourceNotation;
+    int destinationNotation;
+
+    if (IsDigits(initialSourceNotation) && IsDigits(initialDestinationNotation))
+    {
+        sourceNotation = stoi(initialSourceNotation);
+        destinationNotation = stoi(initialDestinationNotation);
+        if (sourceNotation < 2 || sourceNotation > 36)
+        {
+            cout << "Invalid source notation entered\n";
+            return nullopt;
+        }
+        if (destinationNotation < 2 || destinationNotation > 36)
+        {
+            cout << "Invalid destination notation entered\n";
+            return nullopt;
+        }
+    }
+    else
+    {
+        cout << "Notations are set incorrectly\n";
+        return nullopt;
+    }
+
     Args args;
-    args.sourceNotation = argv[1];
-    args.destinationNotation = argv[2];
-    args.value = argv[3];
+    args.sourceNotation = sourceNotation;
+    args.destinationNotation = destinationNotation;
+    args.value = value;
+
     return args;
 }
 
 int main(int argc, char* argv[]) {
     SetConsoleOutputCP(CP_UTF8);
 
-    //TODO В функцию
-    // ------------------- 
     auto args = ParseArgs(argc, argv);
 
     if (!args)
@@ -49,115 +82,91 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    string sourceNotation = args->sourceNotation;
-    string destinationNotation = args->destinationNotation;
+    int sourceNotation = args->sourceNotation;
+    int destinationNotation = args->destinationNotation;
     string value = args->value;
 
-    int sourceNotationInt;
-    int destinationNotationInt;
+    Error error;
 
-    if (IsDigits(sourceNotation) && IsDigits(destinationNotation))
+    auto result = RadixConvert(value, sourceNotation, destinationNotation, error);
+
+    if (!result)
     {
-        sourceNotationInt = stoi(sourceNotation);
-        destinationNotationInt = stoi(destinationNotation);
-        if (sourceNotationInt < 2 || sourceNotationInt > 36)
-        {
-            cout << "Invalid source notation entered\n";
-            return 1;
-        }
-        if (destinationNotationInt < 2 || destinationNotationInt > 36)
-        {
-            cout << "Invalid destination notation entered\n";
-            return 1;
-        }
-    }
-    else
-    {
-        cout << "Notations are set incorrectly\n";
+        cout << error.errorMessage;
         return 1;
     }
 
-    bool error = false;
-
-    // ---------------------
-
-    //Без Int
-    string result = RadixConvert(value, sourceNotationInt, destinationNotationInt, error);
-
-    if (error)
-    {
-        cout << "Failed to convert value\n";
-        return 1;
-    }
-
-    cout << result << endl;
+    cout << *result << endl;
     return 0;
 }
 
-// Сделать такЮ чтобы функция не выводила ошибку
-string RadixConvert(const string& value, const int& sourceNotation, const int& destinationNotation, bool& wasError)
+optional<string> RadixConvert(const string& value, int sourceNotation, int destinationNotation, Error& error)
 {
+    error.errorMessage = "";
     string initialValue = value;
-    bool isNegative = false;
-    // нет проверка на пустую строку, не делает работу за вызваему функцию
-    if (value[0] == '-')
+    if (initialValue.empty())
     {
-        isNegative = true;
-        initialValue = value.substr(1);
+        error.errorMessage = "value is empty";
+        return nullopt;
     }
-    long long decimalValue = StringToInt(initialValue, sourceNotation, wasError);
-    if (wasError)
+    auto decimalValue = StringToInt(initialValue, sourceNotation, error);
+    if (!decimalValue)
     {
-        cout << "Failed to convert Value to decimal notation";
-        return "";
+        return nullopt;
     }
-    string resultValue = IntToString(decimalValue, destinationNotation, wasError);
-    if (wasError)
-    {
-        cout << "Failed to convert Value to destination notation";
-        return "";
-    }
-    return isNegative ? '-' + resultValue : resultValue;
+    string resultValue = IntToString(*decimalValue, destinationNotation);
+    return resultValue;
 }
 
-// убрать wasError, убать передачу по константной ссылке 
-string IntToString(const long long& n, const int& radix, bool& wasError)
+string IntToString(long long n, int radix)
 {
     string reverseResult;
     long long dividend = n;
-    while (dividend >= radix)
+    while (abs(dividend) >= radix)
     {
-        long long modOfDeletion = dividend % radix;
+        long long modOfDeletion = abs(dividend) % radix;
         reverseResult += ConvertIntToChar(modOfDeletion);
         dividend = dividend / radix;
     }
+    dividend = abs(dividend);
     reverseResult += ConvertIntToChar(dividend);
     reverse(reverseResult.begin(), reverseResult.end());
-    return reverseResult;
+    return n < 0 ? '-' + reverseResult : reverseResult;
 }
 
-// Инициализировать выходные параметры функции
-long long StringToInt(const string& str, const int& radix, bool& wasError)
+optional<long long> StringToInt(const string& str, int radix, Error& error)
 {
-    int valueLength = str.length();
+    error.errorMessage = "";
     long long res = 0;
-    for (int i = 0; i < valueLength; i++)
+    string value = str;
+    bool isNegative = false;
+    if (str[0] == '-')
     {
-        if (!((str[i] >= '0' && str[i] <= '9') || (str[i] >= 'A' && str[i] <= 'Z')))
+        isNegative = true;
+        value = str.substr(1);
+    }
+    for (int i = 0; i < value.length(); i++)
+    {
+        res *= radix;
+        if (!((value[i] >= '0' && value[i] <= '9') || (value[i] >= 'A' && value[i] <= 'Z')))
         {
-            wasError = true;
-            return 0;
+            error.errorMessage = "invalid character was found";
+            return nullopt;
         }
-        long num = ConvertCharToInt(str[i]);
+        long long num = ConvertCharToInt(value[i]);
         if (num >= radix)
         {
-            wasError = true;
-            return 0;
+            error.errorMessage = "The original value contains a character that is outside the limit of notation";
+            return nullopt;
         }
-        int power = valueLength - (i + 1);
-        res += num * pow(radix, power);
+        res += num;
+        if (res > MAXINT)
+        {
+            error.errorMessage = "Overflow";
+            return nullopt;
+        }
     }
-    return res;
+    return isNegative ? -res : res;
 }
 
 int ConvertCharToInt(const char& ch)

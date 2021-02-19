@@ -19,7 +19,13 @@ fc "%TEMP%\radix.txt" tests-data/output3.txt || goto err
 %MyProgram% 20 8 -ABCDEF > "%TEMP%\radix.txt" || goto err
 fc "%TEMP%\radix.txt" tests-data/output4.txt || goto err
 
+%MyProgram% 20 8 0 > "%TEMP%\radix.txt" || goto err
+fc "%TEMP%\radix.txt" tests-data/output5.txt || goto err
+
 %MyProgram% 5 8 12345 %MyProgram% > "%TEMP%\output.txt"
+if NOT ERRORLEVEL 1 goto err
+
+%MyProgram% 5 8 "" %MyProgram% > "%TEMP%\output.txt"
 if NOT ERRORLEVEL 1 goto err
 
 %MyProgram% 1 8 0 %MyProgram% > "%TEMP%\output.txt"
