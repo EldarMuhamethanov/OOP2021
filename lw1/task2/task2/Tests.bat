@@ -22,6 +22,9 @@ fc "%TEMP%\radix.txt" tests-data/output4.txt || goto err
 %MyProgram% 20 8 0 > "%TEMP%\radix.txt" || goto err
 fc "%TEMP%\radix.txt" tests-data/output5.txt || goto err
 
+%MyProgram% 10 2 2147483648 %MyProgram% > "%TEMP%\output.txt"
+if NOT ERRORLEVEL 1 goto err
+
 %MyProgram% 5 8 12345 %MyProgram% > "%TEMP%\output.txt"
 if NOT ERRORLEVEL 1 goto err
 
