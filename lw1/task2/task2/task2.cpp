@@ -137,6 +137,11 @@ string IntToString(long long n, int radix)
 optional<long long> StringToInt(const string& str, int radix, Error& error)
 {
     error.errorMessage = "";
+    if (str.empty())
+    {
+        error.errorMessage = "value is empty";
+        return nullopt;
+    }
     long long res = 0;
     string value = str;
     bool isNegative = false;
@@ -145,7 +150,7 @@ optional<long long> StringToInt(const string& str, int radix, Error& error)
         isNegative = true;
         value = str.substr(1);
     }
-    for (int i = 0; i < value.length(); i++)
+    for (unsigned int i = 0; i < value.length(); i++)
     {
         res *= radix;
         if (!((value[i] >= '0' && value[i] <= '9') || (value[i] >= 'A' && value[i] <= 'Z')))
@@ -159,21 +164,33 @@ optional<long long> StringToInt(const string& str, int radix, Error& error)
             error.errorMessage = "The original value contains a character that is outside the limit of notation";
             return nullopt;
         }
-        res += num;
-        if (res > MAXINT)
+        if (isNegative)
         {
-            error.errorMessage = "Overflow";
-            return nullopt;
+            res -= num;
+            if (res < MININT)
+            {
+                error.errorMessage = "Overflow";
+                return nullopt;
+            }
+        }
+        else
+        {
+            res += num;
+            if (res > MAXINT)
+            {
+                error.errorMessage = "Overflow";
+                return nullopt;
+            }
         }
     }
-    return isNegative ? -res : res;
+    return res;
 }
 
 int ConvertCharToInt(const char& ch)
 {
     if (ch <= '9' && ch >= '0')
     {
-        return (int)ch - 48;
+        return (long long)ch - '0';
     }
     return 10 + ch - 'A';
 }
@@ -182,9 +199,9 @@ char ConvertIntToChar(long long& num)
 {
     if (num <= 9)
     {
-        return (num + '0');
+        return (char)(num + 48);
     }
-    return 'A' + (num - 10);
+    return (char)65 + (char)(num - 10);
 }
 
 bool IsDigits(const string& str)

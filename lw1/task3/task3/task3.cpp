@@ -38,15 +38,14 @@ struct WrappedMatrix2x2
 };
 
 optional<WrappedMatrix3x3> MatrixInit(const string& inputFileName, Error& error);
-void WriteMatrix(WrappedMatrix3x3 matrix);
-optional<WrappedMatrix3x3> FindInvertMatrix(WrappedMatrix3x3 matrix, Error& error);
-WrappedMatrix2x2 GetMinor(WrappedMatrix3x3 matrix, int column, int row);
-double CalculateDeterminant2x2(WrappedMatrix2x2 matrix);
-double CalculateDeterminant3x3(WrappedMatrix3x3 matrix);
-WrappedMatrix3x3 TransposeMatrix(WrappedMatrix3x3 matrix);
-WrappedMatrix3x3 GetMatrixKoef(WrappedMatrix3x3 matrix);
-WrappedMatrix3x3 MatrixDivision(WrappedMatrix3x3 matrix, double number);
-bool IsDigits(const string& str);
+void WriteMatrix(const WrappedMatrix3x3 matrix);
+optional<WrappedMatrix3x3> FindInvertMatrix(const WrappedMatrix3x3 matrix, Error& error);
+WrappedMatrix2x2 GetMinor(const WrappedMatrix3x3 matrix, int column, int row);
+double CalculateDeterminant2x2(const WrappedMatrix2x2 matrix);
+double CalculateDeterminant3x3(const WrappedMatrix3x3 matrix);
+WrappedMatrix3x3 TransposeMatrix(const WrappedMatrix3x3 matrix);
+WrappedMatrix3x3 GetMatrixKoef(const WrappedMatrix3x3 matrix);
+WrappedMatrix3x3 MatrixDivision(const WrappedMatrix3x3 matrix, const  double number);
 bool IsBlankLine(string str);
 
 
@@ -94,7 +93,7 @@ int main(int argc, char* argv[])
     return 0;
 }
 
-optional<WrappedMatrix3x3> FindInvertMatrix(WrappedMatrix3x3 matrix, Error& error)
+optional<WrappedMatrix3x3> FindInvertMatrix(const WrappedMatrix3x3 matrix, Error& error)
 {
     error.errorMessage = "";
     double determinant = CalculateDeterminant3x3(matrix);
@@ -113,7 +112,7 @@ optional<WrappedMatrix3x3> FindInvertMatrix(WrappedMatrix3x3 matrix, Error& erro
 }
 
 
-WrappedMatrix3x3 GetMatrixKoef(WrappedMatrix3x3 matrix)
+WrappedMatrix3x3 GetMatrixKoef(const WrappedMatrix3x3 matrix)
 {
     WrappedMatrix3x3 koefMatrix;
     for (int row = 0; row < MATRIX_SIZE; row++)
@@ -130,7 +129,7 @@ WrappedMatrix3x3 GetMatrixKoef(WrappedMatrix3x3 matrix)
     return koefMatrix;
 }
 
-WrappedMatrix3x3 MatrixDivision(WrappedMatrix3x3 matrix, double divisor)
+WrappedMatrix3x3 MatrixDivision(const WrappedMatrix3x3 matrix, const double divisor)
 {
     WrappedMatrix3x3 resultMatrix;
     for (int row = 0; row < MATRIX_SIZE; row++)
@@ -144,7 +143,7 @@ WrappedMatrix3x3 MatrixDivision(WrappedMatrix3x3 matrix, double divisor)
     return resultMatrix;
 }
 
-WrappedMatrix3x3 TransposeMatrix(WrappedMatrix3x3 matrix)
+WrappedMatrix3x3 TransposeMatrix(const WrappedMatrix3x3 matrix)
 {
     WrappedMatrix3x3 transposedMatrix;
     for (int row = 0; row < MATRIX_SIZE; row++)
@@ -157,19 +156,19 @@ WrappedMatrix3x3 TransposeMatrix(WrappedMatrix3x3 matrix)
     return transposedMatrix;
 }
 
-double CalculateDeterminant2x2(WrappedMatrix2x2 matrix)
+double CalculateDeterminant2x2(const WrappedMatrix2x2 matrix)
 {
     return (matrix.items[0][0] * matrix.items[1][1]) - (matrix.items[0][1] * matrix.items[1][0]);
 }
 
-double CalculateDeterminant3x3(WrappedMatrix3x3 matrix)
+double CalculateDeterminant3x3(const WrappedMatrix3x3 matrix)
 {
     return matrix.items[0][0] * CalculateDeterminant2x2(GetMinor(matrix, 0, 0))
         - matrix.items[0][1] * CalculateDeterminant2x2(GetMinor(matrix, 1, 0))
         + matrix.items[0][2] * CalculateDeterminant2x2(GetMinor(matrix, 2, 0));
 }
 
-WrappedMatrix2x2 GetMinor(WrappedMatrix3x3 matrix, int column, int row)
+WrappedMatrix2x2 GetMinor(const WrappedMatrix3x3 matrix, int column, int row)
 {
     int minorRow[2];
     int minorColumn[2];
@@ -178,14 +177,14 @@ WrappedMatrix2x2 GetMinor(WrappedMatrix3x3 matrix, int column, int row)
     int minorIndexColumn = 0;
     for (int i = 0; i < MATRIX_SIZE; i++)
     {
-        if (row != i)
+        if (row != i && minorIndexRow < 2)
         {
-            minorRow[minorIndexRow] = row;
+            minorRow[minorIndexRow] = i;
             minorIndexRow++;
         }
-        if (column != i)
+        if (column != i && minorIndexColumn < 2)
         {
-            minorColumn[minorIndexColumn] = column;
+            minorColumn[minorIndexColumn] = i;
             minorIndexColumn++;
         }
     }
@@ -227,18 +226,13 @@ optional<WrappedMatrix3x3> MatrixInit(const string& inputFileName, Error& error)
                 return nullopt;
             }
             strm >> columnValue;
-            if (!IsDigits(columnValue))
-            {
-                error.errorMessage = "Not number character was found";
-                return nullopt;
-            }
             matrix.items[row][column] = stod(columnValue);
         }
     }
     return matrix;
 }
 
-void WriteMatrix(WrappedMatrix3x3 matrix)
+void WriteMatrix(const WrappedMatrix3x3 matrix)
 {
     for (int row = 0; row < MATRIX_SIZE; row++)
     {
@@ -252,16 +246,6 @@ void WriteMatrix(WrappedMatrix3x3 matrix)
         }
         cout << endl;
     }
-}
-
-bool IsDigits(const string& str)
-{
-    if (str[0] == '-')
-    {
-        string value = str.substr(1);
-        return all_of(value.begin(), value.end(), ::isdigit);
-    }
-    return !str.empty() && all_of(str.begin(), str.end(), ::isdigit);
 }
 
 bool IsSpace(char ch)

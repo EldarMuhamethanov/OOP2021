@@ -27,6 +27,7 @@ struct WrappedMatrix
 };
 
 WrappedMatrix ReadField(istream& in);
+// по const ссылке заполнение
 void WriteField(ostream& out, WrappedMatrix field);
 void FillField(WrappedMatrix& field);
 void MatchCell(WrappedMatrix& field, int row, int column);
@@ -63,7 +64,7 @@ int main(int argc, char* argv[])
         return 1;
     }
     out.open(args->outputFileName);
-
+    // открывать при использовании
     if (!out.is_open())
     {
         cout << "Failed to open " << args->outputFileName << " for writing" << endl;
@@ -78,10 +79,10 @@ int main(int argc, char* argv[])
 
     return 0;
 }
-
+// заменить рекурсию
+// придумать название для функции
 void MatchCell(WrappedMatrix& field, int row, int column)
 {
-    
     if (field.items[row][column] == ' ')
     {
         field.items[row][column] = '.';

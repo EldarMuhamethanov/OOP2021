@@ -22,19 +22,28 @@ fc "%TEMP%\radix.txt" tests-data/output4.txt || goto err
 %MyProgram% 20 8 0 > "%TEMP%\radix.txt" || goto err
 fc "%TEMP%\radix.txt" tests-data/output5.txt || goto err
 
+%MyProgram% 10 2 2147483647 > "%TEMP%\radix.txt" || goto err
+fc "%TEMP%\radix.txt" tests-data/output6.txt || goto err
+
+%MyProgram% 10 2 -2147483648 > "%TEMP%\radix.txt" || goto err
+fc "%TEMP%\radix.txt" tests-data/output7.txt || goto err
+
 %MyProgram% 10 2 2147483648 %MyProgram% > "%TEMP%\output.txt"
 if NOT ERRORLEVEL 1 goto err
 
-%MyProgram% 5 8 12345 %MyProgram% > "%TEMP%\output.txt"
+%MyProgram% 10 2 -2147483649 %MyProgram% > "%TEMP%\output.txt"
 if NOT ERRORLEVEL 1 goto err
 
-%MyProgram% 5 8 "" %MyProgram% > "%TEMP%\output.txt"
+%MyProgram% 5 8 12345 > "%TEMP%\output.txt"
 if NOT ERRORLEVEL 1 goto err
 
-%MyProgram% 1 8 0 %MyProgram% > "%TEMP%\output.txt"
+%MyProgram% 5 8 "" > "%TEMP%\output.txt"
 if NOT ERRORLEVEL 1 goto err
 
-%MyProgram% 4 37 12345 %MyProgram% > "%TEMP%\output.txt"
+%MyProgram% 1 8 0 > "%TEMP%\output.txt"
+if NOT ERRORLEVEL 1 goto err
+
+%MyProgram% 4 37 12345 > "%TEMP%\output.txt"
 if NOT ERRORLEVEL 1 goto err
 
 
