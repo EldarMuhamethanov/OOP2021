@@ -8,6 +8,7 @@
 #include <vector>
 #include <optional>
 #include <iomanip>
+#include <stack>
 
 using namespace std;
 
@@ -21,16 +22,27 @@ struct Args
     string outputFileName;
 };
 
-struct WrappedMatrix
+struct WrappedField
 {
     Matrix items;
 };
 
-WrappedMatrix ReadField(istream& in);
-// по const ссылке заполнение
-void WriteField(ostream& out, WrappedMatrix field);
-void FillField(WrappedMatrix& field);
-void MatchCell(WrappedMatrix& field, int row, int column);
+struct CellCoordinate
+{
+    int x;
+    int y;
+};
+
+struct Error
+{
+    string errorMessage;
+};
+
+optional<WrappedField> ReadField(const string& inputFileName, Error& error);
+void WriteField(const string& outputFileName, const WrappedField& field, Error& error);
+void FillField(WrappedField& field);
+void AddToStackNeighborCells(const WrappedField& field, stack<CellCoordinate>& stack, int row, int column);
+void FillCell(WrappedField& field, stack<CellCoordinate>& stack, int row, int column);
 
 optional<Args> ParseArgs(int argc, char* argv[])
 {
@@ -54,58 +66,71 @@ int main(int argc, char* argv[])
     {
         return 1;
     }
-    ifstream in;
-    ofstream out;
-    in.open(args->inputFileName);
 
-    if (!in.is_open())
+    Error error;
+
+    auto field = ReadField(args->inputFileName, error);
+
+    if (!field && !error.errorMessage.empty())
     {
-        cout << "Failed to open " << args->inputFileName << " for reading" << endl;
-        return 1;
-    }
-    out.open(args->outputFileName);
-    // открывать при использовании
-    if (!out.is_open())
-    {
-        cout << "Failed to open " << args->outputFileName << " for writing" << endl;
+        cout << error.errorMessage << endl;
         return 1;
     }
 
-    WrappedMatrix field = ReadField(in);
+    FillField(*field);
 
-    FillField(field);
+    WriteField(args->outputFileName, *field, error);
 
-    WriteField(out, field);
+    if (!error.errorMessage.empty())
+    {
+        cout << error.errorMessage << endl;
+        return 1;
+    }
 
     return 0;
 }
-// заменить рекурсию
-// придумать название для функции
-void MatchCell(WrappedMatrix& field, int row, int column)
+
+void FillCell(WrappedField& field, stack<CellCoordinate>& stack, int row, int column)
 {
-    if (field.items[row][column] == ' ')
+    while (!stack.empty())
     {
-        field.items[row][column] = '.';
-        if (row < MATRIX_SIZE - 1)
-        {
-            MatchCell(field, row + 1, column);
-        }
-        if (row > 0)
-        {
-            MatchCell(field, row - 1, column);
-        }
-        if (column < MATRIX_SIZE - 1)
-        {
-            MatchCell(field, row, column + 1);
-        }
-        if (column > 0)
-        {
-            MatchCell(field, row, column - 1);
-        }
+        CellCoordinate cell = stack.top();
+        stack.pop();
+        field.items[cell.y][cell.x] = '.';
+        AddToStackNeighborCells(field, stack, cell.y, cell.x);
     }
 }
 
-void FillField(WrappedMatrix& field)
+void AddToStackNeighborCells(const WrappedField& field, stack<CellCoordinate>& stack, int row, int column)
+{
+    CellCoordinate cell;
+    if (row < MATRIX_SIZE - 1 && field.items[row + 1][column] == ' ')
+    {
+        cell.x = column;
+        cell.y = row + 1;
+        stack.push(cell);
+    }
+    if (row > 0 && field.items[row - 1][column] == ' ')
+    {
+        cell.x = column;
+        cell.y = row - 1;
+        stack.push(cell);
+    }
+    if (column < MATRIX_SIZE - 1 && field.items[row][column + 1] == ' ')
+    {
+        cell.x = column + 1;
+        cell.y = row;
+        stack.push(cell);
+    }
+    if (column > 0 && field.items[row][column - 1] == ' ')
+    {
+        cell.x = column - 1;
+        cell.y = row;
+        stack.push(cell);
+    }
+}
+
+void FillField(WrappedField& field)
 {
     for (int row = 0; row < MATRIX_SIZE; row++)
     {
@@ -113,19 +138,26 @@ void FillField(WrappedMatrix& field)
         {
             if (field.items[row][column] == 'O')
             {
-                MatchCell(field, row + 1, column);
-                MatchCell(field, row - 1, column);
-                MatchCell(field, row, column + 1);
-                MatchCell(field, row, column - 1);
+                stack<CellCoordinate> stack;
+                AddToStackNeighborCells(field, stack, row, column);
+                FillCell(field, stack, row, column);
             }
         }
     }
 }
 
-WrappedMatrix ReadField(istream& in)
+optional<WrappedField> ReadField(const string& inputFileName, Error& error)
 {
+    ifstream in;
+    in.open(inputFileName);
+    error.errorMessage = "";
+    if (!in.is_open())
+    {
+        error.errorMessage = "Failed to open " + inputFileName + " for reading";
+        return nullopt;
+    }
     string line;
-    WrappedMatrix field;
+    WrappedField field;
 
     for (int lineIndex = 0; lineIndex < MATRIX_SIZE; lineIndex++)
     {
@@ -133,7 +165,7 @@ WrappedMatrix ReadField(istream& in)
         {
             for (int symbolIndex = 0; symbolIndex < MATRIX_SIZE; symbolIndex++)
             {
-                field.items[lineIndex][symbolIndex] = symbolIndex < line.length()
+                field.items[lineIndex][symbolIndex] = symbolIndex < (int)line.length()
                     ? line[symbolIndex]
                     : ' ';
             }
@@ -149,8 +181,17 @@ WrappedMatrix ReadField(istream& in)
     return field;
 }
 
-void WriteField(ostream& out, WrappedMatrix field)
+void WriteField(const string& outputFileName, const WrappedField& field, Error& error)
 {
+    ofstream out;
+    out.open(outputFileName);
+    error.errorMessage = "";
+    if (!out.is_open())
+    {
+        cout << "Failed to open " << outputFileName << " for writing" << endl;
+        return;
+    }
+
     for (int i = 0; i < MATRIX_SIZE; i++)
     {
         for (int j = 0; j < MATRIX_SIZE; j++)
