@@ -15,11 +15,11 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <Text Include="vocabulary.txt" />
+  </ItemGroup>
+  <ItemGroup>
     <ClCompile Include="task3.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <Text Include="vocabulary.txt" />
   </ItemGroup>
 </Project>

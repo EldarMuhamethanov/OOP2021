@@ -67,7 +67,6 @@ int main(int argc, char* argv[])
     SetConsoleOutputCP(CP_UTF8);
 
     auto args = ParseArgs(argc, argv);
-
     ifstream in;
 
     if (!args)
@@ -110,7 +109,6 @@ optional<WrappedMatrix3x3> FindInvertMatrix(const WrappedMatrix3x3 matrix, Error
 
     return invertMatrix;
 }
-
 
 WrappedMatrix3x3 GetMatrixKoef(const WrappedMatrix3x3 matrix)
 {

@@ -13,6 +13,8 @@
 
 using namespace std;
 
+typedef map<string, vector<string>> Vocabulary;
+
 struct Error
 {
     string errorMessage;
@@ -21,6 +23,12 @@ struct Error
 struct Args
 {
     string vocabularyFileName;
+};
+
+struct VocabularyItem
+{
+    string word;
+    vector<string> translates;
 };
 
 void VocabularyUse(string vocabularyFileName, Error& error);
@@ -40,10 +48,6 @@ optional<Args> ParseArgs(int argc, char* argv[])
 
 int main(int argc, char* argv[])
 {
-    SetConsoleCP(1251);
-    SetConsoleOutputCP(1251);
-    setlocale(LC_ALL, "Russian");
-
     auto args = ParseArgs(argc, argv);
     if (!args)
     {
@@ -62,49 +66,68 @@ int main(int argc, char* argv[])
     return 0;
 }
 
-optional<map<string, vector<string>>> ReadVocabulary(string vocabularyFileName, Error& error)
+optional<VocabularyItem> parseVocabularyItem(string row, Error& error)
+{
+    error.errorMessage = "";
+    VocabularyItem item;
+    regex vocabularyItemRegex(R"((\[.+\])(.+))");
+    regex wordRegex(R"([^\s\[]+[A-Za-zА-Яа-я ]+[^\s\]])");
+    regex translateRegex(R"([^(\s+,)][A-Za-zА-Яа-я ]+)");
+
+    smatch vocabularyItemMatch;
+    smatch wordMatch;
+    smatch translateMatch;
+
+    if (regex_search(row, vocabularyItemMatch, vocabularyItemRegex))
+    {
+        string wordWithBrakets = vocabularyItemMatch[1];
+        if (regex_search(wordWithBrakets, wordMatch, wordRegex))
+        {
+            item.word = wordMatch[0];
+            item.translates = {};
+            string translates = vocabularyItemMatch[2];
+            while (regex_search(translates, translateMatch, translateRegex))
+            {
+                item.translates.push_back(translateMatch[0]);
+                translates = translateMatch.suffix();
+            }
+        }
+        else
+        {
+            error.errorMessage = "Неверный формат заданной строки";
+            return nullopt;
+        }
+    }
+    else
+    {
+        error.errorMessage = "Неверный формат заданной строки";
+        return nullopt;
+    }
+    
+    return item;
+}
+
+optional<Vocabulary> ReadVocabulary(string vocabularyFileName, Error& error)
 {
     error.errorMessage = "";
     ifstream vocabularyFile;
     vocabularyFile.open(vocabularyFileName);
+    Vocabulary vocabulary;
     if (!vocabularyFile.is_open())
     {
-        error.errorMessage = "Failed to open vocabulary file to read";
-        return nullopt;
+        return vocabulary;
     }
-    map<string, vector<string>> vocabulary;
+
     string line;
     while (getline(vocabularyFile, line))
     {
-        string word;
-        regex wordRegex("[\\s\\w]+");
-        regex wordWithBraketRegex(R"(\[(\w|\s)+\])");
-        
-        smatch wordWithBraketMatch;
-        regex_search(line, wordWithBraketMatch, wordWithBraketRegex);
-        smatch wordMatch;
-        string wordWithBraket = wordWithBraketMatch[0];
-        regex_search(wordWithBraket, wordMatch, wordRegex);
-
-        word = wordMatch[0];
-        vocabulary[word] = {};
-
-        string translates = wordWithBraketMatch.suffix();
-
-        regex translateRegex(R"([^\s].+[^,])");
-        smatch translateMatch;
-        int posOfSeparator = translates.find(',');
-        while (posOfSeparator != string::npos)
+        auto parsedItem = parseVocabularyItem(line, error);
+        if (!parsedItem)
         {
-            string translate = translates.substr(0, posOfSeparator);
-            regex_search(translate, translateMatch, translateRegex);
-            translate = translateMatch[0];
-            vocabulary[word].push_back(translate);
-            translates = translates.substr(posOfSeparator + 1);
-            posOfSeparator = translates.find(',');
+            return nullopt;
         }
-        regex_search(translates, translateMatch, translateRegex);
-        vocabulary[word].push_back(translateMatch[0]);
+        VocabularyItem item = *parsedItem;
+        vocabulary[item.word] = item.translates;
     }
     return vocabulary;
 }
@@ -123,7 +146,7 @@ void WriteTranslates(ostream& out, vector<string> translates)
     out << result << endl;
 }
 
-void SaveVocabulary(string vocabularyFileName, map<string, vector<string>> vocabulary, Error& error)
+void SaveVocabulary(string vocabularyFileName, Vocabulary vocabulary, Error& error)
 {
     error.errorMessage = "";
     ofstream vocabularyFile;
@@ -144,11 +167,7 @@ void VocabularyUse(string vocabularyFileName, Error& error)
 {
     error.errorMessage = "";
     auto readedVocabulary = ReadVocabulary(vocabularyFileName, error);
-    if (!readedVocabulary)
-    {
-        return;
-    }
-    map<string, vector<string>> vocabulary = *readedVocabulary;
+    Vocabulary vocabulary = *readedVocabulary;
     string userRequst;
     bool wasModified = false;
     getline(cin, userRequst);
@@ -156,24 +175,37 @@ void VocabularyUse(string vocabularyFileName, Error& error)
     {
         string userRequstInLower = userRequst;
         transform(userRequstInLower.begin(), userRequstInLower.end(), userRequstInLower.begin(), tolower);
+        if (userRequstInLower.empty())
+        {
+            getline(cin, userRequst);
+            continue;
+        }
         if (vocabulary.find(userRequstInLower) != vocabulary.end())
         {
             WriteTranslates(cout, vocabulary[userRequstInLower]);
         }
         else
         {
-            cout << "Unknown word \"" + userRequst + "\". Enter a translation or an empty line to refuse." << endl;
+            cout << "Неизвестное слово \"" + userRequst + "\". Введите перевод или пустую строку для отказа." << endl;
             string userAnswer;
             getline(cin, userAnswer);
             if (userAnswer.empty())
             {
-                cout << "Word \"" + userRequst + "\" ignored." << endl;
+                cout << "Слово  \"" + userRequst + "\" проигнорировано." << endl;
             }
             else if (userAnswer != "...")
             {
-                vocabulary[userRequstInLower] = { userAnswer };
                 wasModified = true;
-                cout << "Word \"" + userRequst + "\" saved in the dictionary as \"" + userAnswer + "\"." << endl;
+                if (vocabulary.find(userAnswer) != vocabulary.end())
+                {
+                    vocabulary[userAnswer].push_back(userRequst);
+                    cout << "Слово \"" + userRequst + "\" добавлено в список переводов слова \"" + userAnswer + "\"." << endl;
+                }
+                else
+                {
+                    vocabulary[userRequstInLower] = { userAnswer };
+                    cout << "Слово \"" + userRequst + "\" сохранено в словаре как \"" + userAnswer + "\"." << endl;
+                }
             }
             else
             {
@@ -184,13 +216,13 @@ void VocabularyUse(string vocabularyFileName, Error& error)
     }
     if (wasModified)
     {
-        cout << "Changes have been made to the dictionary. Enter Y or y to save before exiting." << endl;
+        cout << "В словарь были внесены изменения. Введите Y или y для сохранения перед выходом." << endl;
         string userAnswer;
         getline(cin, userAnswer);
         if (userAnswer == "Y" || userAnswer == "y")
         {
             SaveVocabulary(vocabularyFileName, vocabulary, error);
-            cout << "Changes saved. Goodbye." << endl;
+            cout << "Изменения сохранены. До свидания." << endl;
         }
     }
 }
