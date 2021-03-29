@@ -15,18 +15,15 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="vocabulary.txt" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="task3.cpp">
+    <ClCompile Include="task1.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
-    <ClCompile Include="Dictionary.cpp">
+    <ClCompile Include="Car.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Dictionary.h">
+    <ClInclude Include="Car.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
   </ItemGroup>

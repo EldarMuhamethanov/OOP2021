@@ -144,10 +144,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Dictionary.cpp" />
     <ClCompile Include="task3.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="vocabulary.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Dictionary.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

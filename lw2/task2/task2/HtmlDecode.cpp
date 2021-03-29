@@ -1,13 +1,29 @@
 #include "HtmlDecode.h"
 #include <map>
+#include <iostream>
 #include <regex>
 
 using namespace std;
 
+
+regex GetHtmlToSymbolRegex(map<string, string> const& htmlToSymbolMap)
+{
+	string htmlRegexString;
+	for (auto& html : htmlToSymbolMap)
+	{
+		htmlRegexString += "(" + html.first + ")" + "|";
+	}
+	if (htmlRegexString.size() > 0)
+	{
+		htmlRegexString.pop_back();
+	}
+	regex htmlRegex(htmlRegexString);
+	return htmlRegex;
+}
+
 string HtmlDecode(string const& html)
 {
 	string result;
-	string str = html;
 	map<string, string> htmlToSymbolMap{
 		{"&quot;", "\""},
 		{"&apos;", "'"},
@@ -15,20 +31,23 @@ string HtmlDecode(string const& html)
 		{"&gt;", ">"},
 		{"&amp;", "&"}
 	};
-	regex reg("&+[quot|apos|lt|gt|amp]+;");
-	smatch match;
-	while (true)
+	regex htmlRegex = GetHtmlToSymbolRegex(htmlToSymbolMap);
+
+	const vector<smatch> matches{
+		sregex_iterator{html.begin(), html.end(), htmlRegex},
+		sregex_iterator{}
+	};
+
+	if (matches.size() == 0)
 	{
-		if (!regex_search(str, match, reg))
-		{
-			result += str;
-			break;
-		}
-		string prefix = match.prefix();
-		string suffix = match.suffix();
-		result += prefix + htmlToSymbolMap[match[0]];
-		str = suffix;
+		return html;
 	}
+	for(smatch match : matches)
+	{
+		string prefix = match.prefix();
+		result += prefix + htmlToSymbolMap[match[0]];
+	}
+	result += matches.back().suffix();
 
 	return result;
 }

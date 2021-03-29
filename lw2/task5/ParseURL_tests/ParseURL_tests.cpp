@@ -5,7 +5,6 @@
 
 using namespace std;
 
-
 Protocol protocol;
 int port;
 string host;
@@ -113,13 +112,32 @@ SCENARIO("ParseURL with protocol http and port 8000 gives port 8000")
     REQUIRE(port == 8000);
 }
 
-SCENARIO("ParseURL with invalid port gives invalid URL")
+SCENARIO("ParseURL with valid port 1 gives valid URL")
+{
+    string url = "http://www.mysite.com:1/docs/document1.html?page=30&lang=en#title";
+    bool isValidUrl = ParseURL(url, protocol, port, host, document);
+    REQUIRE(isValidUrl);
+    REQUIRE(port == 1);
+}
+SCENARIO("ParseURL with valid port 65535 gives valid URL")
+{
+    string url = "http://www.mysite.com:65535/docs/document1.html?page=30&lang=en#title";
+    bool isValidUrl = ParseURL(url, protocol, port, host, document);
+    REQUIRE(isValidUrl);
+    REQUIRE(port == 65535);
+}
+SCENARIO("ParseURL with invalid port 65536 gives invalid URL")
 {
     string url = "http://www.mysite.com:65536/docs/document1.html?page=30&lang=en#title";
     bool isValidUrl = ParseURL(url, protocol, port, host, document);
     REQUIRE(!isValidUrl);
 }
-
+SCENARIO("ParseURL with invalid port 0 gives invalid URL")
+{
+    string url = "http://www.mysite.com:0/docs/document1.html?page=30&lang=en#title";
+    bool isValidUrl = ParseURL(url, protocol, port, host, document);
+    REQUIRE(!isValidUrl);
+}
 SCENARIO("ParseURL valid url with document gives right document")
 {
     string url = "http://www.mysite.com/docs/document1.html?page=30&lang=en#title";
@@ -134,4 +152,35 @@ SCENARIO("ParseURL valid url without document gives empty document")
     bool isValidUrl = ParseURL(url, protocol, port, host, document);
     REQUIRE(isValidUrl);
     REQUIRE(document.empty());
+}
+
+SCENARIO("Parse valid url with 1-symbol host and port")
+{
+    string url = "http://w:1234/";
+    bool isValidUrl = ParseURL(url, protocol, port, host, document);
+    REQUIRE(isValidUrl);
+    REQUIRE(port == 1234);
+    REQUIRE(host == "w");
+    REQUIRE(document.empty());
+}
+
+SCENARIO("Parse invalid url with invalid port with two separator \":\"")
+{
+    string url = "http://w:1234:9/";
+    bool isValidUrl = ParseURL(url, protocol, port, host, document);
+    REQUIRE(!isValidUrl);
+}
+
+SCENARIO("Parse invalid url with invalid port with character")
+{
+    string url = "http://w:123e/";
+    bool isValidUrl = ParseURL(url, protocol, port, host, document);
+    REQUIRE(!isValidUrl);
+}
+
+SCENARIO("Parse invalid url with double :: port")
+{
+    string url = "http://www::123/";
+    bool isValidUrl = ParseURL(url, protocol, port, host, document);
+    REQUIRE(!isValidUrl);
 }
