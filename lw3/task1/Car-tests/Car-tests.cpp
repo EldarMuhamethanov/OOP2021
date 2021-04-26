@@ -11,51 +11,29 @@ SCENARIO("Car test")
 		REQUIRE(!car.IsTurnedOn());
 		REQUIRE(car.GetGear() == 0);
 		REQUIRE(car.GetSpeed() == 0);
-		REQUIRE(car.GetDirection() == Direction::STAY);
 
 		WHEN("engine is turned off")
 		{
 			WHEN("change gear with turned off engine")
 			{
-				bool isSuccess;
-				isSuccess = car.SetGear(1);
-				THEN("Error")
-				{
-					REQUIRE(!isSuccess);
-				}
-				isSuccess = car.SetGear(-1);
-				THEN("Error")
-				{
-					REQUIRE(!isSuccess);
-				}
+				REQUIRE_THROWS(car.SetGear(1));
+				REQUIRE_THROWS(car.SetGear(-1));
 			}
 
 			WHEN("increase speed to 20 with turnedOff engine")
 			{
-				bool isSuccess = car.SetSpeed(20);
-				THEN("Error")
-				{
-					REQUIRE(!isSuccess);
-				}
+				REQUIRE_THROWS(car.SetSpeed(20));
 			}
 
 			WHEN("turn on engine")
 			{
-				bool isSuccess = car.TurnOnEngine();
-				THEN("Success")
-				{
-					REQUIRE(isSuccess);
-					REQUIRE(car.IsTurnedOn());
-				}
+				REQUIRE(car.TurnOnEngine());
+				REQUIRE(car.IsTurnedOn());
 			}
 			WHEN("turn off engine")
 			{
-				bool isSuccess = car.TurnOffEngine();
-				THEN("Success")
-				{
-					REQUIRE(isSuccess);
-					REQUIRE(!car.IsTurnedOn());
-				}
+				REQUIRE(car.TurnOffEngine());
+				REQUIRE(!car.IsTurnedOn());
 			}
 		}
 
@@ -67,32 +45,17 @@ SCENARIO("Car test")
 				car.SetGear(0);
 				WHEN("change gear with turnedOn engine, neutral gear and speed = 0")
 				{
-					bool isSuccess;
-					isSuccess = car.SetGear(1);
-					THEN("Success")
-					{
-						REQUIRE(isSuccess);
-						REQUIRE(car.GetGear() == 1);
-					}
-					isSuccess = car.SetGear(-1);
-					THEN("Success")
-					{
-						REQUIRE(isSuccess);
-						REQUIRE(car.GetGear() == -1);
-					}
-					isSuccess = car.SetGear(2);
-					THEN("Error")
-					{
-						REQUIRE(!isSuccess);
-					}
+					REQUIRE(car.SetGear(1));
+					REQUIRE(car.GetGear() == 1);
+
+					REQUIRE(car.SetGear(-1));
+					REQUIRE(car.GetGear() == -1);
+
+					REQUIRE_THROWS(car.SetGear(2));
 				}
 				WHEN("increase speed to 20 with turnedOn engine BUT on neutral gear")
 				{
-					bool isSuccess = car.SetSpeed(20);
-					THEN("Error")
-					{
-						REQUIRE(!isSuccess);
-					}
+					REQUIRE_THROWS(car.SetSpeed(20));
 				}
 			}
 
@@ -102,81 +65,46 @@ SCENARIO("Car test")
 				WHEN("change gear with turnedOn engine, gear = 1, speed = 25")
 				{
 					car.SetSpeed(25);
-					REQUIRE(car.GetDirection() == Direction::FORWARD);
-					bool isSuccess = car.SetGear(2);
-					THEN("Success")
-					{
-						REQUIRE(isSuccess);
-						REQUIRE(car.GetGear() == 2);
-					}
-					isSuccess = car.SetGear(-1);
-					THEN("Error")
-					{
-						REQUIRE(!isSuccess);
-					}
-					isSuccess = car.SetGear(2);
-					THEN("Sucess")
-					{
-						REQUIRE(isSuccess);
-						REQUIRE(car.GetGear() == 2);
-					}
+					REQUIRE(car.SetGear(2));
+					REQUIRE(car.GetGear() == 2);
+
+					REQUIRE_THROWS(car.SetGear(-1));
+
+					REQUIRE(car.SetGear(2));
+					REQUIRE(car.GetGear() == 2);
 				}
 			}
 
 			WHEN("use back gear")
 			{
 				car.SetGear(-1);
-				REQUIRE(car.GetDirection() == Direction::STAY);
 				WHEN("increase speed with turnedOn engine and on back gear")
 				{
-					bool isSuccess = car.SetSpeed(10);
-					THEN("Success")
-					{
-						REQUIRE(isSuccess);
-						REQUIRE(car.GetSpeed() == 10);
-						REQUIRE(car.GetDirection() == Direction::BACK);
-					}
-					isSuccess = car.SetSpeed(30);
-					THEN("Error")
-					{
-						REQUIRE(!isSuccess);
-					}
+					REQUIRE(car.SetSpeed(10));
+					REQUIRE(car.GetSpeed() == -10);
+
+					REQUIRE_THROWS(car.SetSpeed(30));
 				}
 				WHEN("have any speed")
 				{
 					car.SetSpeed(10);
 					WHEN("change gear")
 					{
-						bool isSuccess = car.SetGear(1);
-						THEN("Error")
-						{
-							REQUIRE(!isSuccess);
-						}
-						isSuccess = car.SetGear(0);
-						THEN("Sucess")
-						{
-							REQUIRE(isSuccess);
-							REQUIRE(car.GetGear() == 0);
-						}
+						REQUIRE_THROWS(car.SetGear(1));
+
+						REQUIRE(car.SetGear(0));
+						REQUIRE(car.GetGear() == 0);
 					}
 				}
 				WHEN("speed = 0")
 				{
 					car.SetSpeed(0);
-					REQUIRE(car.GetDirection() == Direction::STAY);
 					WHEN("change gear")
 					{
-						bool isSuccess = car.SetGear(1);
-						THEN("Success")
-						{
-							REQUIRE(isSuccess);
-							REQUIRE(car.GetGear() == 1);
-						}
-						isSuccess = car.SetGear(2);
-						THEN("Error")
-						{
-							REQUIRE(!isSuccess);
-						}
+						REQUIRE(car.SetGear(1));
+						REQUIRE(car.GetGear() == 1);
+
+						REQUIRE_THROWS(car.SetGear(2));
 					}
 				}
 			}
@@ -185,37 +113,37 @@ SCENARIO("Car test")
 		WHEN("car has turnedOn engine speed or/and gear != 0")
 		{
 			car.TurnOnEngine();
+			WHEN("turn off engine and check value")
+			{
+				REQUIRE(car.TurnOffEngine());
+				REQUIRE(!car.IsTurnedOn());
+			}
 			WHEN("car has speed or gear")
 			{
 				car.SetGear(1);
 				car.SetSpeed(10);
-				WHEN("turn off engine")
+				WHEN("try to turn off engine and catch error")
 				{
-					bool isSuccess = car.TurnOffEngine();
-					THEN("error")
-					{
-						REQUIRE(!isSuccess);
-					}
+					REQUIRE_THROWS(car.TurnOffEngine());
 				}
 				car.SetGear(0);
-				WHEN("turn off engine")
+				WHEN("try to turn off engine and catch error")
 				{
-					bool isSuccess = car.TurnOffEngine();
-					THEN("error")
-					{
-						REQUIRE(!isSuccess);
-					}
+					REQUIRE_THROWS(car.TurnOffEngine());
 				}
 			}
-			WHEN("car does not have gear or speed")
+		}
+		WHEN("car has turnOn engine any speed and first gear")
+		{
+			car.TurnOnEngine();
+			car.SetGear(1);
+			car.SetSpeed(10);
+			WHEN("turn to neutral gear")
 			{
-				WHEN("turn off engine")
+				car.SetGear(0);
+				WHEN("try to turn to first gear and catch error")
 				{
-					bool isSuccess = car.TurnOffEngine();
-					THEN("Success")
-					{
-						REQUIRE(isSuccess);
-					}
+					REQUIRE_THROWS(car.SetGear(1));
 				}
 			}
 		}

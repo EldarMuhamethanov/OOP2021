@@ -1,0 +1,19 @@
+﻿"Rational-tests.exe" (Win32). Загружено "E:\oop\labs\!oop2021\OOP2021\lw5\Debug\Rational-tests.exe". Символы загружены.
+"Rational-tests.exe" (Win32). Загружено "C:\Windows\SysWOW64\ntdll.dll". 
+"Rational-tests.exe" (Win32). Загружено "C:\Windows\SysWOW64\kernel32.dll". 
+"Rational-tests.exe" (Win32). Загружено "C:\Windows\SysWOW64\KernelBase.dll". 
+"Rational-tests.exe" (Win32). Загружено "C:\Windows\SysWOW64\msvcp140d.dll". 
+"Rational-tests.exe" (Win32). Загружено "C:\Windows\SysWOW64\vcruntime140d.dll". 
+"Rational-tests.exe" (Win32). Загружено "C:\Windows\SysWOW64\ucrtbased.dll". 
+Поток 0x40d0 завершился с кодом 0 (0x0).
+"Rational-tests.exe" (Win32). Загружено "C:\Windows\SysWOW64\kernel.appcore.dll". 
+"Rational-tests.exe" (Win32). Загружено "C:\Windows\SysWOW64\msvcrt.dll". 
+"Rational-tests.exe" (Win32). Загружено "C:\Windows\SysWOW64\rpcrt4.dll". 
+"Rational-tests.exe" (Win32). Загружено "C:\Windows\SysWOW64\sspicli.dll". 
+"Rational-tests.exe" (Win32). Загружено "C:\Windows\SysWOW64\cryptbase.dll". 
+"Rational-tests.exe" (Win32). Загружено "C:\Windows\SysWOW64\bcryptprimitives.dll". 
+"Rational-tests.exe" (Win32). Загружено "C:\Windows\SysWOW64\sechost.dll". 
+Поток 0x3160 завершился с кодом 0 (0x0).
+Поток 0x4664 завершился с кодом 0 (0x0).
+Поток 0x2638 завершился с кодом 0 (0x0).
+Программа "[19836] Rational-tests.exe" завершилась с кодом 0 (0x0).

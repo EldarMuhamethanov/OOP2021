@@ -1,7 +1,11 @@
-[arm] рука
+[apple] яблоко, груша
 [at] в
-[cat] кошка, кот
-[leg] нога
-[the long] длинный
-[the long title] длинной название
+[get] взять
+[green] зеленый, красный
+[hello] привет
+[hi] привет
+[red square] красная площадь
+[the long title] at
 [the red square] красная площадь
+[word] слово
+[новое слово] new word

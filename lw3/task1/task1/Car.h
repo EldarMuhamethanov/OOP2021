@@ -1,21 +1,11 @@
 #pragma once
 
-enum class Direction {
-	FORWARD,
-	BACK,
-	STAY,
-};
-
 class Car
 {
 public:
 	Car();
 
-	~Car();
-
 	bool IsTurnedOn() const;
-
-	Direction GetDirection() const;
 
 	int GetSpeed() const;
 
@@ -34,6 +24,8 @@ private:
 	int m_turnedOn;
 	int m_speed;
 	int m_gear;
-	Direction m_direction;
+
+private:
+	int ConvertUserSpeedInModel(int speed);
 };
 

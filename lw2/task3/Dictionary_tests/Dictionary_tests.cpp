@@ -89,6 +89,14 @@ SCENARIO("HandleUnknownWord input not empty string => add new word to dictionary
 	REQUIRE(GetTranslates(dictionary, "test word") == result);
 }
 
+SCENARIO("TranslateWord of exist word")
+{
+	Dictionary dictionary{
+		{"orange", {"оранжевый", "апельсин"}},
+	};
+	REQUIRE(TranslateWord(dictionary, "orange"));
+}
+
 SCENARIO("TranslateWord of not exist word")
 {
 	Dictionary dictionary{

@@ -9,52 +9,35 @@
 #include <optional>
 #include <iomanip>
 #include <set>
+#include "GeneratePrimeNumbersSet.h"
 
 using namespace std;
 
-set<int> GeneratePrimeNumbersSet(int upperBound)
+struct Args 
 {
-    set<int> primeSet;
-    vector<bool> arr;
-    arr.push_back(true);
-    for (int i = 1; i <= upperBound; i++)
+    int number;
+};
+
+optional<Args> ParseArgs(int argc, char* argv[])
+{
+    if (argc != 2)
     {
-        arr.push_back(true);
+        cout << "Invalid arguments count\n";
+        cout << "Usage: task4.exe <number>\n";
+        return nullopt;
     }
-    int i = 2;
-    while (i * i <= upperBound)
-    {
-        int j = i;
-        if (arr[j])
-        {
-            int prime = j;
-            primeSet.insert(prime);
-            j *= j;
-            while (j <= upperBound)
-            {
-                arr[j] = false;
-                j = j + prime;
-            }
-        }
-        i++;
-    }
-    while (i <= upperBound)
-    {
-        if (arr[i])
-        {
-            primeSet.insert(i);
-        }
-        i++;
-    }
-    return primeSet;
+    Args args;
+    args.number = stoi(argv[1]);
+    return args;
 }
 
-int main()
+int main(int argc, char* argv[])
 {
-    set<int> primeSet = GeneratePrimeNumbersSet(1000000);
-    for (auto& prime: primeSet)
+    auto args = ParseArgs(argc, argv);
+    if (!args)
     {
-        cout << prime << endl;
+        return 1;
     }
-    cout << "Size " << primeSet.size() << endl;
+    set<int> primeSet = GeneratePrimeNumbersSet(args->number);
+    cout << primeSet.size() << endl;
 }

@@ -10,7 +10,7 @@ using namespace std;
 const int PROTOCOL_SUBMATCH_INDEX = 1;
 const int HOST_SUBMATCH_INDEX = 3;
 const int DOCUMENT_SUBMATCH_INDEX = 5;
-const int MAX_PORT_VALUE = 65536;
+const int MAX_PORT_VALUE = 65535;
 
 const map<string, Protocol> stringToProtocolMap{
     {"http", Protocol::HTTP},
@@ -30,7 +30,7 @@ bool GetValidPort(string const& portString, int& port)
     if (regex_match(portString, portMatch, portRegex))
     {
         port = stoi(portMatch[0]);
-        if (port > 0 && port < MAX_PORT_VALUE)
+        if (port > 0 && port <= MAX_PORT_VALUE)
         {
             return true;
         }
@@ -38,7 +38,7 @@ bool GetValidPort(string const& portString, int& port)
     return false;
 }
 
-bool GetValidProtocol(string& protocolString, Protocol& protocol)
+bool GetValidProtocol(string protocolString, Protocol& protocol)
 {
     transform(protocolString.begin(), protocolString.end(), protocolString.begin(), tolower);
     if (stringToProtocolMap.find(protocolString) != stringToProtocolMap.end())
@@ -57,7 +57,7 @@ bool ParseHost(const string& hostString, string& host, int& port, const Protocol
     if (regex_search(hostString, hostMatch, hostRegex))
     {
         host = hostMatch[1];
-        if (host.find(":") != std::string::npos)
+        if (host.find(':') != std::string::npos)
         {
             return false;
         }

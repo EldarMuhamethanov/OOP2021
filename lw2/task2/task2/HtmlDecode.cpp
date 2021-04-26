@@ -24,7 +24,7 @@ regex GetHtmlToSymbolRegex(map<string, string> const& htmlToSymbolMap)
 string HtmlDecode(string const& html)
 {
 	string result;
-	map<string, string> htmlToSymbolMap{
+	static const map<string, string> htmlToSymbolMap{
 		{"&quot;", "\""},
 		{"&apos;", "'"},
 		{"&lt;", "<"},
@@ -42,10 +42,10 @@ string HtmlDecode(string const& html)
 	{
 		return html;
 	}
-	for(smatch match : matches)
+	for(smatch const& match : matches)
 	{
 		string prefix = match.prefix();
-		result += prefix + htmlToSymbolMap[match[0]];
+		result += prefix + htmlToSymbolMap.at(match[0]);
 	}
 	result += matches.back().suffix();
 

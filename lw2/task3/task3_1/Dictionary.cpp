@@ -18,10 +18,10 @@ void WriteMessage(string msg)
 
 string TrimString(const string& str)
 {
-    string result = str;
-    regex trimRegex(R"(^\s+|\s+$)");
-    regex_replace(result, trimRegex, "");
-    return result;
+    regex trimRegex(R"(^(\s*)(.+?)(\s*)$)");
+    smatch match;
+    regex_search(str, match, trimRegex);
+    return match[2];
 }
 
 vector<string> SplitString(const string& str, const string& separator)
@@ -45,13 +45,12 @@ optional<DictionaryItem> ParseDictionaryItem(const string& row, Error& error)
     error.errorMessage = "";
     DictionaryItem item;
     regex dictionaryItemRegex(R"((\[.+\])(.*))");
-    regex wordRegex(R"([A-Za-zА-Яа-я ]+)");
-
     smatch dictionaryItemMatch;
 
     if (regex_search(row, dictionaryItemMatch, dictionaryItemRegex))
     {
         string wordWithBrakets = dictionaryItemMatch[1];
+        regex wordRegex(R"([A-Za-zА-Яа-я ]+)");
         smatch wordMatch;
         if (regex_search(wordWithBrakets, wordMatch, wordRegex))
         {
@@ -206,6 +205,7 @@ void DictionaryUse(const string& dictionaryFileName, Error& error)
     {
         return;
     }
+    // readedDictionary исправить
     Dictionary dictionary = *readedDictionary;
     int startDictionarySize = dictionary.size();
     string userRequst;

@@ -140,10 +140,15 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\task1\Car.cpp" />
+    <ClCompile Include="..\task1\CarException.cpp" />
+    <ClCompile Include="..\task1\RemoteCarControl.cpp" />
     <ClCompile Include="Car-tests.cpp" />
+    <ClCompile Include="RemoteCarControl-tests.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\task1\Car.h" />
+    <ClInclude Include="..\task1\CarException.h" />
+    <ClInclude Include="..\task1\RemoteCarControl.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

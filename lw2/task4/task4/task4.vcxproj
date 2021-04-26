@@ -143,7 +143,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="GeneratePrimeNumbersSet.cpp" />
     <ClCompile Include="task4.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="GeneratePrimeNumbersSet.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
