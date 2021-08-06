@@ -1,0 +1,132 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Исходные файлы">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Файлы заголовков">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Файлы ресурсов">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Файлы заголовков\Impl">
+      <UniqueIdentifier>{c3735879-b444-42f6-8bdf-859e3908f22e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Файлы заголовков\VehicleInterfaces">
+      <UniqueIdentifier>{49640de4-30db-4d18-acf1-0851728e4011}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Файлы заголовков\PersonInterfaces">
+      <UniqueIdentifier>{7d162bac-6e0d-417e-bda2-39f6f8ef59e1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Файлы заголовков\Vehicles">
+      <UniqueIdentifier>{618bc5e9-4c34-4232-b757-331f500a8438}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Файлы заголовков\Persons">
+      <UniqueIdentifier>{813f30b8-34cf-4923-9af7-aadac0b5e0b7}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Tests.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="..\task3\CBus.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="..\task3\CCarImpl.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="..\task3\CPerson.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="..\task3\CPersonImpl.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="..\task3\CPoliceCar.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="..\task3\CPoliceMan.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="..\task3\CRacer.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="..\task3\CRacingCar.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="..\task3\CTaxi.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="..\task3\CVehicleImpl.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\task3\CCarImpl.h">
+      <Filter>Файлы заголовков\Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\task3\CPersonImpl.h">
+      <Filter>Файлы заголовков\Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\task3\CVehicleImpl.h">
+      <Filter>Файлы заголовков\Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\task3\ITaxi.h">
+      <Filter>Файлы заголовков\VehicleInterfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="..\task3\IVehicle.h">
+      <Filter>Файлы заголовков\VehicleInterfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="..\task3\IPoliceCar.h">
+      <Filter>Файлы заголовков\VehicleInterfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="..\task3\ICar.h">
+      <Filter>Файлы заголовков\VehicleInterfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="..\task3\IBus.h">
+      <Filter>Файлы заголовков\VehicleInterfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="..\task3\IPerson.h">
+      <Filter>Файлы заголовков\PersonInterfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="..\task3\IPoliceMan.h">
+      <Filter>Файлы заголовков\PersonInterfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="..\task3\CPoliceCar.h">
+      <Filter>Файлы заголовков\Vehicles</Filter>
+    </ClInclude>
+    <ClInclude Include="..\task3\CRacingCar.h">
+      <Filter>Файлы заголовков\Vehicles</Filter>
+    </ClInclude>
+    <ClInclude Include="..\task3\CTaxi.h">
+      <Filter>Файлы заголовков\Vehicles</Filter>
+    </ClInclude>
+    <ClInclude Include="..\task3\CBus.h">
+      <Filter>Файлы заголовков\Vehicles</Filter>
+    </ClInclude>
+    <ClInclude Include="..\task3\IBasicVehicle.h">
+      <Filter>Файлы заголовков\VehicleInterfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="..\task3\CPerson.h">
+      <Filter>Файлы заголовков\Persons</Filter>
+    </ClInclude>
+    <ClInclude Include="..\task3\CRacer.h">
+      <Filter>Файлы заголовков\Persons</Filter>
+    </ClInclude>
+    <ClInclude Include="..\task3\CPoliceMan.h">
+      <Filter>Файлы заголовков\Persons</Filter>
+    </ClInclude>
+    <ClInclude Include="..\task3\IRacer.h">
+      <Filter>Файлы заголовков\PersonInterfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="..\task3\IRacingCar.h">
+      <Filter>Файлы заголовков\VehicleInterfaces</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="cpp.hint" />
+  </ItemGroup>
+</Project>

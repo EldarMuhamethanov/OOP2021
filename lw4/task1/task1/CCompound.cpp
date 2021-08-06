@@ -4,7 +4,23 @@ using namespace std;
 
 CCompound::CCompound()
 	: CBody("Compound")
+	, m_parentBody(nullptr)
 {
+}
+
+CCompound::~CCompound()
+{
+	m_parentBody = nullptr;
+}
+
+void CCompound::SetParentBody(CCompound* body)
+{
+	m_parentBody = body;
+}
+
+CCompound* CCompound::GetParentBody() const
+{
+	return m_parentBody;
 }
 
 double CCompound::GetMass() const
@@ -51,32 +67,22 @@ void CCompound::AppendProperties(std::ostream& strm) const
 	}
 }
 
-bool CCompound::CheckExistCompoundBodyInBody(vector<shared_ptr<CBody>> const& childs) const
+bool CCompound::CheckExistBodyInCompoundBody(CBody* const& addedBody, CCompound* const& modifiedBody) const
 {
-	for (const auto child : childs)
-	{
-		shared_ptr<CCompound> compoundChild = dynamic_pointer_cast<CCompound>(child);
-		if (compoundChild == nullptr)
-			continue;
-		if (compoundChild.get() == this)
-			return true;
-		if (CheckExistCompoundBodyInBody(compoundChild.get()->GetChildBodies()))
-			return true;
-	}
+	if (modifiedBody->GetParentBody() == nullptr)
+		return false;
+	if (modifiedBody->GetParentBody() == addedBody || CheckExistBodyInCompoundBody(addedBody, modifiedBody->GetParentBody()))
+		return true;
 	return false;
 }
 
-bool CCompound::CheckExistBodyInCompoundBody(shared_ptr<CBody> const& child) const
-{
-	for (const auto childsItem : m_childBodies)
-	{
-		if (child == childsItem)
-		{
-			return true;
-		}
-	}
-	return false;
-}
+//bool CCompound::CheckExistBodyInCompoundBody(shared_ptr<CBody> const& child) const
+//{
+//	for (const auto childsItem : m_childBodies)
+//		if (child == childsItem)
+//			return true;
+//	return false;
+//}
 
 bool CCompound::AddChildBody(shared_ptr<CBody> const& child)
 {
@@ -84,12 +90,14 @@ bool CCompound::AddChildBody(shared_ptr<CBody> const& child)
 	if (solidChild != nullptr)
 	{
 		AddChildSolidBody(solidChild);
+		solidChild.get()->SetParentBody(this);
 		return true;
 	}
 	shared_ptr<CCompound> compoundChild = dynamic_pointer_cast<CCompound>(child);
 	if (compoundChild != nullptr)
 	{
 		AddChildCompoundBody(compoundChild);
+		compoundChild.get()->SetParentBody(this);
 		return true;
 	}
 	throw BodiesException("unknown child class");
@@ -97,7 +105,7 @@ bool CCompound::AddChildBody(shared_ptr<CBody> const& child)
 
 bool CCompound::AddChildCompoundBody(shared_ptr<CCompound> const& compoundChild)
 {
-	if (compoundChild.get() == this || CheckExistCompoundBodyInBody(compoundChild->GetChildBodies()))
+	if (compoundChild.get() == this || CheckExistBodyInCompoundBody(compoundChild.get(), this))
 	{
 		throw BodiesException("recursive append");
 	}
@@ -107,7 +115,7 @@ bool CCompound::AddChildCompoundBody(shared_ptr<CCompound> const& compoundChild)
 
 bool CCompound::AddChildSolidBody(shared_ptr<CSolidBody> const& child)
 {
-	if (CheckExistBodyInCompoundBody(child))
+	if (child.get()->GetParentBody() == this)
 	{
 		throw BodiesException("body already exist in compound body");
 	}
